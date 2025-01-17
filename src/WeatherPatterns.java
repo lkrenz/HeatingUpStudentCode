@@ -21,7 +21,7 @@ public class WeatherPatterns {
      */
     public static int longestWarmingTrend(int[] temperatures) {
         // TODO: Write your code here!
-        return naiveApproach(temperatures);
+        return naiveHelperIterative(temperatures);
     }
 
     public static int naiveApproach(int[] temperatures) {
@@ -47,14 +47,15 @@ public class WeatherPatterns {
         return runMax;
     }
 
-    public static int naiveHelper(int[] temperatures) {
+    public static int naiveHelperIterative(int[] temperatures) {
 
         // Queue order goes index, maxTemp, streak
         Queue<int[]> data = new LinkedList<>();
 
-        ArrayList<Integer> streaks = new ArrayList<>();
-        int[] initial = new int[3];
+        int maxStreak = 0;
+        int[] initial = new int[4];
         initial[1] = -9999;
+        initial[3] = 9999;
         data.add(initial);
 
 
@@ -63,31 +64,37 @@ public class WeatherPatterns {
             int index = current[0];
             int streak = current[2];
             int max = current[1];
+            int lowestSkipped = current[3];
             if (index >= temperatures.length) {
-                streaks.add(streak);
+                if (streak > maxStreak) maxStreak = streak;
                 continue;
             }
             if (temperatures[index] > max) {
-                initial = new int[3];
-                initial[0] = index + 1;
-                initial[1] = temperatures[index];
-                initial[2] = streak + 1;
-                data.add(initial);
+                if (temperatures[index] < lowestSkipped) {
+                    initial = new int[4];
+                    initial[0] = index + 1;
+                    initial[1] = temperatures[index];
+                    initial[2] = streak + 1;
+                    initial[3] = 9999;
+                    data.add(initial);
+                }
 
-                initial = new int[3];
+                initial = new int[4];
                 initial[0] = index + 1;
                 initial[1] = max;
                 initial[2] = streak;
+                if (lowestSkipped > temperatures[index]) initial[3] = temperatures[index];
                 data.add(initial);
             }
             else {
-                initial = new int[3];
+                initial = new int[4];
                 initial[0] = index + 1;
                 initial[1] = max;
                 initial[2] = streak;
+                initial[3] = lowestSkipped;
                 data.add(initial);
             }
         }
+        return maxStreak;
     }
-
 }
