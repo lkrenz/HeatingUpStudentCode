@@ -16,17 +16,16 @@ public class WeatherPatterns {
      */
     public static int longestWarmingTrend(int[] temperatures) {
         // TODO: Write your code here!
-
-        return 0;
+        return naiveApproach(temperatures);
     }
 
-    public int naiveApproach(int[] temperatures) {
+    public static int naiveApproach(int[] temperatures) {
         return naiveHelper(0, temperatures, -9999, 0);
     }
 
-    public int naiveHelper(int index, int[] temperatures, int max, int streak) {
+    public static int naiveHelper(int index, int[] temperatures, int max, int streak) {
         if (index >= temperatures.length) {
-            return max;
+            return streak;
         }
         int runMax = 0;
         if (temperatures[index] > max) {
