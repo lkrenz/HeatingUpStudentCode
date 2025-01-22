@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * The class WeatherPatterns finds the longest span of days in which
@@ -20,81 +17,46 @@ public class WeatherPatterns {
      * @return the longest run of days with increasing temperatures
      */
     public static int longestWarmingTrend(int[] temperatures) {
-        // TODO: Write your code here!
-        return naiveHelperIterative(temperatures);
-    }
+        ArrayList<Integer>[] adjList = buildList(temperatures);
+        int[] paths = new int[temperatures.length];
 
-    public static int naiveApproach(int[] temperatures) {
-        return naiveHelper(0, temperatures, -9999, 0);
-    }
+        int longestStreak = 0;
 
-    public static int naiveHelper(int index, int[] temperatures, int max, int streak) {
-        if (index >= temperatures.length) {
-            return streak;
+        for (int i = 0; i < temperatures.length; i++) {
+            findLongest(adjList, paths, i);
+            if (paths[i] > longestStreak) longestStreak = paths[i];
         }
-        int runMax = 0;
-        if (temperatures[index] > max) {
-            runMax = naiveHelper(index + 1, temperatures, temperatures[index], streak + 1);
-            int temp = naiveHelper(index + 1, temperatures, max, streak);
-            if (temp > runMax) {
-                runMax = temp;
+        return longestStreak;
+    }
+
+    public static void findLongest(ArrayList<Integer>[] adjList, int[] paths, int node) {
+        if (adjList[node].isEmpty()) {
+            paths[node] = 1;
+        }
+        int max = 0;
+        for (int i : adjList[node]) {
+            if (paths[i] == 0) {
+                findLongest(adjList, paths, i);
+            }
+            if (paths[i] > max) {
+                max = paths[i];
             }
         }
-        else {
-            runMax = naiveHelper(index + 1, temperatures, max, streak);
-        }
-
-        return runMax;
+        paths[node] = max + 1;
     }
 
-    public static int naiveHelperIterative(int[] temperatures) {
+    public static ArrayList<Integer>[] buildList(int[] temperatures) {
+        ArrayList<Integer>[] adjList = new ArrayList[temperatures.length];
 
-        // Queue order goes index, maxTemp, streak
-        Queue<int[]> data = new LinkedList<>();
-
-        int maxStreak = 0;
-        int[] initial = new int[4];
-        initial[1] = -9999;
-        initial[3] = 9999;
-        data.add(initial);
-
-
-        while (!data.isEmpty()) {
-            int[] current = data.poll();
-            int index = current[0];
-            int streak = current[2];
-            int max = current[1];
-            int lowestSkipped = current[3];
-            if (index >= temperatures.length) {
-                if (streak > maxStreak) maxStreak = streak;
-                continue;
-            }
-            if (temperatures[index] > max) {
-                if (temperatures[index] < lowestSkipped) {
-                    initial = new int[4];
-                    initial[0] = index + 1;
-                    initial[1] = temperatures[index];
-                    initial[2] = streak + 1;
-                    initial[3] = 9999;
-                    data.add(initial);
+        for (int i = temperatures.length - 1; i >= 0; i--) {
+            int currentTemp = temperatures[i];
+            adjList[i] = new ArrayList<>();
+            for (int j = i; j > 0; j--) {
+                if (temperatures[j] < currentTemp) {
+                    adjList[i].add(j);
                 }
-
-                initial = new int[4];
-                initial[0] = index + 1;
-                initial[1] = max;
-                initial[2] = streak;
-                if (lowestSkipped > temperatures[index]) initial[3] = temperatures[index];
-                data.add(initial);
-            }
-            else {
-                initial = new int[4];
-                initial[0] = index + 1;
-                initial[1] = max;
-                initial[2] = streak;
-                initial[3] = lowestSkipped;
-                data.add(initial);
             }
         }
-        return maxStreak;
+        return adjList;
     }
 }
